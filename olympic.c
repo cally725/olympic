@@ -38,6 +38,7 @@ Olympic	Chambre	            Anneaux Sensors	        0	        11	    In
 #define BYPASS_FIXATION_DOOR            4
 #define BYPASS_PUCE_MAGNET              21
 #define BYPASS_PHONE                    99
+
 /*
  * Variable definition
  */
@@ -46,15 +47,18 @@ char anneauxSensorsLeftBypass[30] = {"BYPASS_ANNEAUX_SENSORS_LEFT"};
 char anneauxSensorsRightBypass[30] = {"BYPASS_ANNEAUX_SENSORS_RIGHT"};
 char phoneBypass[30] = {"BYPASS_PHONE"};
 int phoneBypassActive = 0;
-time_t anneauxSensorsBypassTimer = 0;
 char puceMagnetBypass[30] = {"BYPASS_PUCE_MAGNET"};
-time_t puceMagnetBypassTimer = 0;
 char fixationDoorBypass[30] = {"BYPASS_FIXATION_DOOR"};
+time_t anneauxSensorsBypassTimer = 0;
+time_t puceMagnetBypassTimer = 0;
 time_t fixationDoorBypassBypassTimer = 0;
-
 time_t noTimer = -1;
 
 char key = ' ';
+
+S2D_Image *voice;
+S2D_Text *txt;
+S2D_Window *window;
 
 /*
  * Function :   checkBypass
@@ -139,11 +143,9 @@ void TimedActivate(int pin, int state, time_t *startTime)
 
 /*
  * Function :   CheckControls
- * Description: Activate n IO pin for 10 seconds1
+ * Description: Verify all game inputs and bypass
  * 
- * Parameters:  pin         Pin to drive for the bypass
- *              state       State of the pin to set
- *              startTime   Needed when a 10 second delay is required before restoring initial value
+ * Parameters:  None
  *
  * Return       No return value
  * 
@@ -174,15 +176,15 @@ void CheckControls()
 
 }
 
-//=======================================================
-
-S2D_Image *voice;
-
-S2D_Text *txt;
-
-S2D_Window *window;
-
-
+/*
+ * Function :   ClearScreen
+ * Description: Clear display window to black
+ * 
+ * Parameters:  None
+ *
+ * Return       No return value
+ * 
+ */
 void ClearScreen()
 {
     S2D_DrawTriangle(
@@ -206,6 +208,15 @@ void ClearScreen()
         490, 165, 0, 0, 0, 1);
 }
 
+/*
+ * Function :   DisplayNumber
+ * Description: Display the final image
+ * 
+ * Parameters:  None
+ *
+ * Return       No return value
+ * 
+ */
 void DisplayNumber()
 {
     S2D_SetText(txt, "123456");
@@ -214,17 +225,15 @@ void DisplayNumber()
     S2D_DrawText(txt);
 }
 
-char ReadFakePhone()
-{
-    if (key == ' ')
-        return ' ';
-    else
-    {
-        char aKey = key;
-        key = ' ';
-        return aKey;
-    }
-}
+/*
+ * Function :   Render
+ * Description: Main programm loop
+ * 
+ * Parameters:  None
+ *
+ * Return       No return value
+ * 
+ */
 void Render() {
 	
     CheckControls();
@@ -237,6 +246,15 @@ void Render() {
         DisplayNumber();
 }
 
+/*
+ * Function :   on_key
+ * Description: Read key when in the main Render loop
+ * 
+ * Parameters:  S2D_Event key pressed event
+ *
+ * Return       No return value
+ * 
+ */
 void on_key(S2D_Event e) 
 {
     switch (e.type) 
@@ -262,6 +280,15 @@ void on_key(S2D_Event e)
     }
 }
 
+/*
+ * Function :   main
+ * Description: Program for the Olympic
+ * 
+ * Parameters:  None
+ * 
+ * Return       int but it never returns
+ * 
+ */  
 int main() 
 {    
     wiringPiSetup() ;
@@ -296,7 +323,7 @@ int main()
     
     txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "", 40);
 
-    window = S2D_CreateWindow("Hello Triangle", 640, 480, NULL, Render, 0);
+    window = S2D_CreateWindow("Olympic Room", 640, 480, NULL, Render, 0);
 
     voice = S2D_CreateImage("Voice.png");    
 
