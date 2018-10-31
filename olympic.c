@@ -37,13 +37,15 @@ Olympic	Chambre	            Anneaux Sensors	        0	        11	    In
 #define FIXATION_DOOR                   4
 #define BYPASS_FIXATION_DOOR            4
 #define BYPASS_PUCE_MAGNET              21
-
+#define BYPASS_PHONE                    99
 /*
  * Variable definition
  */
  
 char anneauxSensorsLeftBypass[30] = {"BYPASS_ANNEAUX_SENSORS_LEFT"};
 char anneauxSensorsRightBypass[30] = {"BYPASS_ANNEAUX_SENSORS_RIGHT"};
+char phoneBypass[30] = {"BYPASS_PHONE"};
+int phoneBypassActive = 0;
 time_t anneauxSensorsBypassTimer = 0;
 char puceMagnetBypass[30] = {"BYPASS_PUCE_MAGNET"};
 time_t puceMagnetBypassTimer = 0;
@@ -75,7 +77,11 @@ void checkBypass(char *file, int pin, int state, time_t *startTime)
 	file1 = fopen(file, "rb");
 	if (file1)
 	{
-        if (*startTime == noTimer)
+        if (pin == BYPASS_PHONE)
+        {
+            phoneBypassActive = 1;
+        }   
+        else if (*startTime == noTimer)
         {
             digitalWrite(pin, state);
         }
@@ -160,10 +166,12 @@ void CheckControls()
             
     // Bypass management    
     // Check if any of the bypass file exist
-    checkBypass(anneauxSensorsLeftBypass, BYPASS_ANNEAUX_SENSORS_LEFT, HIGH, &anneauxSensorsBypassTimer);
-    checkBypass(anneauxSensorsRightBypass, BYPASS_ANNEAUX_SENSORS_RIGHT, HIGH, &anneauxSensorsBypassTimer);
+    checkBypass(anneauxSensorsLeftBypass, BYPASS_ANNEAUX_SENSORS_LEFT, LOW, &noTimer);
+    checkBypass(anneauxSensorsRightBypass, BYPASS_ANNEAUX_SENSORS_RIGHT, LOW, &noTimer);
     checkBypass(puceMagnetBypass, BYPASS_PUCE_MAGNET, LOW, &noTimer);
-    checkBypass(fixationDoorBypass, BYPASS_FIXATION_DOOR, HIGH, &fixationDoorBypassBypassTimer);
+    checkBypass(fixationDoorBypass, BYPASS_FIXATION_DOOR, LOW, &noTimer);
+    checkBypass(phoneBypass, BYPASS_PHONE, LOW, &noTimer);
+
 }
 
 //=======================================================
@@ -223,7 +231,7 @@ void Render() {
     char c = ReadPhone();
     if (c != ' ')
         InsertPhoneDidgit(c);
-    if (CheckPhoneNumber() == 0)
+    if ((CheckPhoneNumber() == 0) && (phoneBypassActive == 0))
         ClearScreen();
     else
         DisplayNumber();
@@ -284,6 +292,7 @@ int main()
     digitalWrite(BYPASS_PUCE_MAGNET, HIGH);
 
     InitPhone();
+    phoneBypassActive = 0;
     
     txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "", 40);
 
