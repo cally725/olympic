@@ -157,22 +157,22 @@ void CheckControls()
     // If closed then open both doors
     if (digitalRead(ANNEAUX_SENSORS) == 0)
     {
-        digitalWrite(ANNEAUX_DOOR_LEFT, LOW);
-        digitalWrite(ANNEAUX_DOOR_RIGHT, LOW);
+        digitalWrite(ANNEAUX_DOOR_LEFT, HIGH);
+        digitalWrite(ANNEAUX_DOOR_RIGHT, HIGH);
     }
     // Fixation management
     // Check if fixations sensors are all in place (set to ground)
     // If closed then open the door
     if (digitalRead(FIXATION_SENSORS) == 0)
-        digitalWrite(FIXATION_DOOR, LOW);
+        digitalWrite(FIXATION_DOOR, HIGH);
             
     // Bypass management    
     // Check if any of the bypass file exist
-    checkBypass(anneauxSensorsLeftBypass, BYPASS_ANNEAUX_SENSORS_LEFT, LOW, &noTimer);
-    checkBypass(anneauxSensorsRightBypass, BYPASS_ANNEAUX_SENSORS_RIGHT, LOW, &noTimer);
-    checkBypass(puceMagnetBypass, BYPASS_PUCE_MAGNET, LOW, &noTimer);
-    checkBypass(fixationDoorBypass, BYPASS_FIXATION_DOOR, LOW, &noTimer);
-    checkBypass(phoneBypass, BYPASS_PHONE, LOW, &noTimer);
+    checkBypass(anneauxSensorsLeftBypass, BYPASS_ANNEAUX_SENSORS_LEFT, HIGH, &noTimer);
+    checkBypass(anneauxSensorsRightBypass, BYPASS_ANNEAUX_SENSORS_RIGHT, HIGH, &noTimer);
+    checkBypass(puceMagnetBypass, BYPASS_PUCE_MAGNET, HIGH, &noTimer);
+    checkBypass(fixationDoorBypass, BYPASS_FIXATION_DOOR, HIGH, &noTimer);
+    checkBypass(phoneBypass, BYPASS_PHONE, HIGH, &noTimer);
 
 }
 
@@ -294,29 +294,23 @@ int main()
     wiringPiSetup() ;
     
     pinMode(ANNEAUX_SENSORS, INPUT);
-    pinMode(BYPASS_ANNEAUX_SENSORS_LEFT, OUTPUT);
-    pinMode(BYPASS_ANNEAUX_SENSORS_RIGHT, OUTPUT);
     pinMode(ANNEAUX_DOOR_LEFT, OUTPUT);
     pinMode(ANNEAUX_DOOR_RIGHT, OUTPUT);
     pinMode(FIXATION_SENSORS, INPUT);
     pinMode(FIXATION_DOOR, OUTPUT);
-    pinMode(BYPASS_FIXATION_DOOR, OUTPUT);
-    pinMode(BYPASS_PUCE_MAGNET, OUTPUT);
     pinMode(BYPASS_PUCE_MAGNET, OUTPUT);
 
     
     pullUpDnControl(ANNEAUX_SENSORS, PUD_UP);
-    pullUpDnControl(BYPASS_ANNEAUX_SENSORS_LEFT, PUD_UP);
-    digitalWrite(BYPASS_ANNEAUX_SENSORS_LEFT, HIGH);
-    pullUpDnControl(BYPASS_ANNEAUX_SENSORS_RIGHT, PUD_UP);
-    digitalWrite(BYPASS_ANNEAUX_SENSORS_RIGHT, HIGH);
+    pullUpDnControl(ANNEAUX_DOOR_LEFT, PUD_UP);
+    digitalWrite(ANNEAUX_DOOR_LEFT, LOW);
+    pullUpDnControl(ANNEAUX_DOOR_RIGHT, PUD_UP);
+    digitalWrite(ANNEAUX_DOOR_RIGHT, LOW);
     pullUpDnControl(FIXATION_SENSORS, PUD_UP);
     pullUpDnControl(FIXATION_DOOR, PUD_UP);
-    digitalWrite(FIXATION_DOOR, HIGH);
-    pullUpDnControl(BYPASS_FIXATION_DOOR, PUD_UP);
-    digitalWrite(BYPASS_FIXATION_DOOR, HIGH);
+    digitalWrite(FIXATION_DOOR, LOW);
     pullUpDnControl(BYPASS_PUCE_MAGNET, PUD_UP);
-    digitalWrite(BYPASS_PUCE_MAGNET, HIGH);
+    digitalWrite(BYPASS_PUCE_MAGNET, LOW);
 
     InitPhone();
     phoneBypassActive = 0;
