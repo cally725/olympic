@@ -49,6 +49,8 @@ char phoneBypass[30] = {"BYPASS_PHONE"};
 int phoneBypassActive = 0;
 char puceMagnetBypass[30] = {"BYPASS_PUCE_MAGNET"};
 char fixationDoorBypass[30] = {"BYPASS_FIXATION_DOOR"};
+char stopOlympic[20] = {"STOP_OLYMPIC"};
+
 time_t anneauxSensorsBypassTimer = 0;
 time_t puceMagnetBypassTimer = 0;
 time_t fixationDoorBypassBypassTimer = 0;
@@ -109,6 +111,32 @@ void checkBypass(char *file, int pin, int state, time_t *startTime)
 	}
 }
 
+
+/*
+ * Function :   checkEndRequest
+ * Description: Check if the end file is present
+ *              if it is it means that we need to stop the program
+ * 
+ * Parameters:  file        Name of the file to check
+ *
+ * Return       No return value
+ * 
+ */
+int checkEndRequest(char *file)
+{
+	FILE *file1;
+    
+
+	file1 = fopen(file, "rb");
+	if (file1)
+	{
+        return 1;
+	}
+    else
+    {
+        return 0;
+    }
+}
 /*
  * Function :   TimedActivate
  * Description: Activate n IO pin for 10 seconds1
@@ -246,6 +274,14 @@ void Render() {
         DisplayNumber();
 }
 
+void Update()
+{
+    if (checkEndRequest(stopOlympic) == 1)
+        {
+            S2D_FreeWindow(window);
+        }
+}
+
 /*
  * Function :   on_key
  * Description: Read key when in the main Render loop
@@ -280,6 +316,16 @@ void on_key(S2D_Event e)
     }
 }
 
+void cleanUpFiles()
+{
+    remove("BYPASS_ANNEAUX_SENSORS_LEFT");
+    remove("BYPASS_ANNEAUX_SENSORS_RIGHT");
+    remove("BYPASS_PHONE");
+    remove("BYPASS_PUCE_MAGNET");
+    remove("BYPASS_FIXATION_DOOR");
+    remove("STOP_OLYMPIC");
+}
+
 /*
  * Function :   main
  * Description: Program for the Olympic
@@ -291,6 +337,8 @@ void on_key(S2D_Event e)
  */  
 int main() 
 {    
+    cleanUpFiles();
+    
     wiringPiSetup() ;
     
     pinMode(ANNEAUX_SENSORS, INPUT);
@@ -317,7 +365,7 @@ int main()
     
     txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "", 40);
 
-    window = S2D_CreateWindow("Olympic Room", 640, 480, NULL, Render, 0);
+    window = S2D_CreateWindow("Olympic Room", 640, 480, Update, Render, 0);
 
     voice = S2D_CreateImage("Voice.png");    
 
@@ -336,9 +384,14 @@ int main()
 
     S2D_FreeText(txt);
   
-    S2D_FreeWindow(window);
+    //S2D_FreeWindow(window);
 
     S2D_Close(window);
+    
+    digitalWrite(ANNEAUX_DOOR_LEFT, HIGH);
+    digitalWrite(ANNEAUX_DOOR_RIGHT, HIGH);
+    digitalWrite(FIXATION_DOOR, HIGH);
+    digitalWrite(BYPASS_PUCE_MAGNET, HIGH);
 
     return 0;
 }
