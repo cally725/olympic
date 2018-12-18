@@ -11,7 +11,7 @@
 #define PHONE_COLUMN_3  10
 #define PHONE_COLUMN_4  11
 
-char RefPhoneNumber[11] = {'1', '8', '5', '5', '4', '8', '2', '7', '3', '5', '1'};
+char RefPhoneNumber[11] = {'1', '8', '0', '5', '4', '8', '2', '7', '3', '5', '1'};
 char phoneNumber[11] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 int didgitIndex = 0;
 int validPhoneNumber = 0;

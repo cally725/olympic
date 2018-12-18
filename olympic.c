@@ -8,8 +8,8 @@
 Game    Room                Device                  WiringPi    Pi Pin  I/O
 
 Olympic	Chambre	            Anneaux Sensors	        0	        11	    In 
-                            Anneaux Sensors Bypass	1, 2	    12, 13	Out
-                            Anneaux Dual Dors	    1, 2	    12, 13	Out
+                            Anneaux Sensors Bypass	1    	    12  	Out
+                            Anneaux Dual Dors	    1   	    12  	Out
                             Phone Buttons	        5	        18	    Out
                             Phone Buttons	        6	        22	    Out
                             Phone Buttons	        7	        7	    Out
@@ -22,6 +22,8 @@ Olympic	Chambre	            Anneaux Sensors	        0	        11	    In
                             Fixation Sensors Bypass	4	        16	    Out
                             Fixation Trap	        4	        16	    Out
                             Magnetic Card Bypass	21	        29	    Out
+                             
+                            Left available          2           13      Out
 */
 
 /*
@@ -29,10 +31,8 @@ Olympic	Chambre	            Anneaux Sensors	        0	        11	    In
  */
 
 #define ANNEAUX_SENSORS                 0
-#define BYPASS_ANNEAUX_SENSORS_LEFT     1
-#define BYPASS_ANNEAUX_SENSORS_RIGHT    2
-#define ANNEAUX_DOOR_LEFT               1
-#define ANNEAUX_DOOR_RIGHT              2
+#define BYPASS_ANNEAUX_SENSORS          1
+#define ANNEAUX_DOOR                    1
 #define FIXATION_SENSORS                3
 #define FIXATION_DOOR                   4
 #define BYPASS_FIXATION_DOOR            4
@@ -43,8 +43,7 @@ Olympic	Chambre	            Anneaux Sensors	        0	        11	    In
  * Variable definition
  */
  
-char anneauxSensorsLeftBypass[30] = {"BYPASS_ANNEAUX_SENSORS_LEFT"};
-char anneauxSensorsRightBypass[30] = {"BYPASS_ANNEAUX_SENSORS_RIGHT"};
+char anneauxSensorsBypass[30] = {"BYPASS_ANNEAUX_SENSORS"};
 char phoneBypass[30] = {"BYPASS_PHONE"};
 int phoneBypassActive = 0;
 char puceMagnetBypass[30] = {"BYPASS_PUCE_MAGNET"};
@@ -185,8 +184,7 @@ void CheckControls()
     // If closed then open both doors
     if (digitalRead(ANNEAUX_SENSORS) == 0)
     {
-        digitalWrite(ANNEAUX_DOOR_LEFT, HIGH);
-        digitalWrite(ANNEAUX_DOOR_RIGHT, HIGH);
+        digitalWrite(ANNEAUX_DOOR, HIGH);
     }
     // Fixation management
     // Check if fixations sensors are all in place (set to ground)
@@ -196,8 +194,7 @@ void CheckControls()
             
     // Bypass management    
     // Check if any of the bypass file exist
-    checkBypass(anneauxSensorsLeftBypass, BYPASS_ANNEAUX_SENSORS_LEFT, HIGH, &noTimer);
-    checkBypass(anneauxSensorsRightBypass, BYPASS_ANNEAUX_SENSORS_RIGHT, HIGH, &noTimer);
+    checkBypass(anneauxSensorsBypass, BYPASS_ANNEAUX_SENSORS, HIGH, &noTimer);
     checkBypass(puceMagnetBypass, BYPASS_PUCE_MAGNET, HIGH, &noTimer);
     checkBypass(fixationDoorBypass, BYPASS_FIXATION_DOOR, HIGH, &noTimer);
     checkBypass(phoneBypass, BYPASS_PHONE, HIGH, &noTimer);
@@ -247,10 +244,7 @@ void ClearScreen()
  */
 void DisplayNumber()
 {
-    S2D_SetText(txt, "123456");
-    txt->x = 250;
-    txt->y = 220;
-    S2D_DrawText(txt);
+    S2D_DrawImage(voice);
 }
 
 /*
@@ -269,6 +263,8 @@ void Render() {
     if (c != ' ')
         InsertPhoneDidgit(c);
     if ((CheckPhoneNumber() == 0) && (phoneBypassActive == 0))
+        //S2D_DrawImage(voice);
+
         ClearScreen();
     else
         DisplayNumber();
@@ -318,8 +314,7 @@ void on_key(S2D_Event e)
 
 void cleanUpFiles()
 {
-    remove("BYPASS_ANNEAUX_SENSORS_LEFT");
-    remove("BYPASS_ANNEAUX_SENSORS_RIGHT");
+    remove("BYPASS_ANNEAUX_SENSORS");
     remove("BYPASS_PHONE");
     remove("BYPASS_PUCE_MAGNET");
     remove("BYPASS_FIXATION_DOOR");
@@ -342,18 +337,15 @@ int main()
     wiringPiSetup() ;
     
     pinMode(ANNEAUX_SENSORS, INPUT);
-    pinMode(ANNEAUX_DOOR_LEFT, OUTPUT);
-    pinMode(ANNEAUX_DOOR_RIGHT, OUTPUT);
+    pinMode(ANNEAUX_DOOR, OUTPUT);
     pinMode(FIXATION_SENSORS, INPUT);
     pinMode(FIXATION_DOOR, OUTPUT);
     pinMode(BYPASS_PUCE_MAGNET, OUTPUT);
 
     
     pullUpDnControl(ANNEAUX_SENSORS, PUD_UP);
-    pullUpDnControl(ANNEAUX_DOOR_LEFT, PUD_UP);
-    digitalWrite(ANNEAUX_DOOR_LEFT, LOW);
-    pullUpDnControl(ANNEAUX_DOOR_RIGHT, PUD_UP);
-    digitalWrite(ANNEAUX_DOOR_RIGHT, LOW);
+    pullUpDnControl(ANNEAUX_DOOR, PUD_UP);
+    digitalWrite(ANNEAUX_DOOR, LOW);
     pullUpDnControl(FIXATION_SENSORS, PUD_UP);
     pullUpDnControl(FIXATION_DOOR, PUD_UP);
     digitalWrite(FIXATION_DOOR, LOW);
@@ -365,9 +357,14 @@ int main()
     
     txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "", 40);
 
-    window = S2D_CreateWindow("Olympic Room", 640, 480, Update, Render, 0);
+    window = S2D_CreateWindow("Olympic Room", 1600, 900, Update, Render, 0);
 
-    voice = S2D_CreateImage("Voice.png");    
+    voice = S2D_CreateImage("instructionSki.png");   
+    
+    voice->x = 25;
+    voice->y = 0; 
+    voice->width  = 1550;
+    voice->height = 900;
 
     txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "Missile Launched", 40);
 
@@ -378,6 +375,7 @@ int main()
 
     window->on_key = on_key;
 
+    S2D_ShowCursor(false);
     S2D_Show(window);
 
     S2D_FreeImage(voice);
@@ -388,10 +386,11 @@ int main()
 
     S2D_Close(window);
     
-    digitalWrite(ANNEAUX_DOOR_LEFT, HIGH);
-    digitalWrite(ANNEAUX_DOOR_RIGHT, HIGH);
+    digitalWrite(ANNEAUX_DOOR, HIGH);
     digitalWrite(FIXATION_DOOR, HIGH);
     digitalWrite(BYPASS_PUCE_MAGNET, HIGH);
+    
+    cleanUpFiles();
 
     return 0;
 }
