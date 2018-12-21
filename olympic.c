@@ -57,7 +57,7 @@ time_t noTimer = -1;
 
 char key = ' ';
 
-S2D_Image *voice;
+S2D_Image *image;
 S2D_Text *txt;
 S2D_Window *window;
 
@@ -107,6 +107,7 @@ void checkBypass(char *file, int pin, int state, time_t *startTime)
 
                 }
         }
+        fclose(file1);
 	}
 }
 
@@ -129,6 +130,7 @@ int checkEndRequest(char *file)
 	file1 = fopen(file, "rb");
 	if (file1)
 	{
+        fclose(file1);
         return 1;
 	}
     else
@@ -244,7 +246,7 @@ void ClearScreen()
  */
 void DisplayNumber()
 {
-    S2D_DrawImage(voice);
+    S2D_DrawImage(image);
 }
 
 /*
@@ -262,12 +264,11 @@ void Render() {
     char c = ReadPhone();
     if (c != ' ')
         InsertPhoneDidgit(c);
-    if ((CheckPhoneNumber() == 0) && (phoneBypassActive == 0))
-        //S2D_DrawImage(voice);
-
-        ClearScreen();
-    else
+    if ((CheckPhoneNumber() == 1) || (phoneBypassActive == 1))
+        //S2D_DrawImage(image);
         DisplayNumber();
+    else        
+        ClearScreen();
 }
 
 void Update()
@@ -355,32 +356,21 @@ int main()
     InitPhone();
     phoneBypassActive = 0;
     
-    txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "", 40);
-
     window = S2D_CreateWindow("Olympic Room", 1600, 900, Update, Render, 0);
 
-    voice = S2D_CreateImage("instructionSki.png");   
+    image = S2D_CreateImage("instructionSki.png");   
     
-    voice->x = 25;
-    voice->y = 0; 
-    voice->width  = 1550;
-    voice->height = 900;
-
-    txt = S2D_CreateText("Alien-Encounters-Regular.ttf", "Missile Launched", 40);
-
-    txt->color.r = 0.0;
-    txt->color.g = 0.8;
-    txt->color.b = 0.0;
-    txt->color.a = 1.0;
+    image->x = 25;
+    image->y = 0; 
+    image->width  = 1550;
+    image->height = 900;
 
     window->on_key = on_key;
 
     S2D_ShowCursor(false);
     S2D_Show(window);
 
-    S2D_FreeImage(voice);
-
-    S2D_FreeText(txt);
+    S2D_FreeImage(image);
   
     //S2D_FreeWindow(window);
 
