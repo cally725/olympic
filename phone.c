@@ -11,7 +11,7 @@
 #define PHONE_COLUMN_3  10
 #define PHONE_COLUMN_4  11
 
-char RefPhoneNumber[11] = {'1', '8', '5', '5', '4', '8', '2', '7', '3', '5', '1'};
+char RefPhoneNumber[11] = {'1', '8', '0', '5', '4', '8', '2', '7', '3', '5', '1'};
 char phoneNumber[11] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 int didgitIndex = 0;
 int validPhoneNumber = 0;
@@ -38,11 +38,27 @@ void InsertPhoneDidgit(char c)
 {
     if (validPhoneNumber == 0)
     {
-        phoneNumber[didgitIndex++] = c;
-        if (didgitIndex >= MAX_PHONE_NUMBER_DIGIT)
-            didgitIndex = 0;
-        DisplayPhoneNumber();
-     }
+        if (didgitIndex != 0)
+        {
+            if (phoneNumber[didgitIndex-1] != c)
+            {
+                phoneNumber[didgitIndex++] = c;
+                if (didgitIndex >= MAX_PHONE_NUMBER_DIGIT)
+                    didgitIndex = 0;
+                DisplayPhoneNumber();
+            }
+        }
+        else
+        {
+            if (phoneNumber[MAX_PHONE_NUMBER_DIGIT-1] != c)
+            {
+                phoneNumber[didgitIndex++] = c;
+                if (didgitIndex >= MAX_PHONE_NUMBER_DIGIT)
+                    didgitIndex = 0;
+                DisplayPhoneNumber();
+            }
+        }
+    }
 }
 
 int CheckPhoneNumber()
@@ -92,7 +108,7 @@ char ReadPhone()
     char keyPress = ' ';
     
     digitalWrite(5, LOW);
-    delay(0);
+    delay(10);
        if (inputButtonPressed(13))
        {
            keyPress = '9';
@@ -112,7 +128,7 @@ char ReadPhone()
     digitalWrite(5, HIGH);
 
     digitalWrite(6, LOW);
-    delay(0);
+    delay(10);
        if (inputButtonPressed(13))
        {
            keyPress = '8';
@@ -132,7 +148,7 @@ char ReadPhone()
     digitalWrite(6, HIGH);
 
     digitalWrite(7, LOW);
-    delay(0);
+    delay(10);
        if (inputButtonPressed(13))
        {
            keyPress = '7';
